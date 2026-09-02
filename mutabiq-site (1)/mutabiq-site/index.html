@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مطابق — تحليل السيرة الذاتية ومطابقة الوظائف</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{
+    --bg:#0D211D;
+    --surface:#123028;
+    --surface2:#1B3D33;
+    --accent:#E3A73B;
+    --accent-dim:#8A6A2C;
+    --sage:#6FA98B;
+    --danger:#D9705A;
+    --text:#F3EFE6;
+    --text-muted:#9FB6AC;
+    --border:rgba(243,239,230,0.12);
+    --font-ar:'Tajawal', sans-serif;
+    --font-en-head:'Space Grotesk', sans-serif;
+    --font-en-body:'Inter', sans-serif;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-ar);
+    line-height:1.7;
+    overflow-x:hidden;
+  }
+  body.lang-en{ font-family:var(--font-en-body); }
+  body.lang-en h1, body.lang-en h2, body.lang-en h3, body.lang-en .brand{
+    font-family:var(--font-en-head);
+  }
+
+  [data-lang]{ display:none; }
+  body.lang-ar [data-lang="ar"]{ display:revert; }
+  body.lang-en [data-lang="en"]{ display:revert; }
+  [data-lang-inline]{ display:none; }
+  body.lang-ar [data-lang-inline="ar"]{ display:revert; }
+  body.lang-en [data-lang-inline="en"]{ display:revert; }
+  body.lang-ar [data-lang-block="ar"]{ display:block; }
+  body.lang-en [data-lang-block="en"]{ display:block; }
+
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 28px; }
+
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(13,33,29,0.88);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 28px; max-width:1100px; margin:0 auto; gap:20px;
+  }
+  .brand{ font-size:1.3rem; font-weight:900; color:var(--text); display:flex; align-items:center; gap:10px; white-space:nowrap;}
+  .brand-mark{ width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg, var(--accent), var(--sage)); display:inline-block; }
+  .nav-links{ display:flex; gap:26px; flex:1; justify-content:center; }
+  .nav-links a{ color:var(--text-muted); text-decoration:none; font-size:0.9rem; transition:color .15s; }
+  .nav-links a:hover{ color:var(--text); }
+  .lang-toggle{ display:flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; flex-shrink:0; }
+  .lang-toggle button{ background:none; border:none; color:var(--text-muted); font-family:inherit; font-size:0.85rem; padding:8px 18px; cursor:pointer; transition:background .2s, color .2s; }
+  .lang-toggle button.active{ background:var(--accent); color:#1A1300; font-weight:700; }
+
+  .hero{ padding:90px 0 70px; display:grid; grid-template-columns:1.1fr 0.9fr; gap:50px; align-items:center; }
+  .hero h1{ font-size:2.7rem; font-weight:900; line-height:1.25; margin-bottom:22px; }
+  body.lang-en .hero h1{ font-weight:600; }
+  .hero .eyebrow{ color:var(--sage); font-size:0.95rem; margin-bottom:14px; display:block; font-weight:500; }
+  .hero p.lead{ color:var(--text-muted); font-size:1.1rem; max-width:520px; margin-bottom:34px; }
+  .cta-row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .btn-primary{ background:var(--accent); color:#1A1300; border:none; padding:14px 30px; border-radius:10px; font-size:1rem; font-weight:700; font-family:inherit; cursor:pointer; transition:transform .15s, box-shadow .15s; }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(227,167,59,0.25); }
+  .btn-primary:disabled{ opacity:0.6; cursor:not-allowed; transform:none; box-shadow:none; }
+  .btn-ghost{ background:none; color:var(--text); border:1px solid var(--border); padding:14px 26px; border-radius:10px; font-size:1rem; font-family:inherit; cursor:pointer; }
+  .btn-ghost:hover{ border-color:var(--text-muted); }
+
+  .scan-card{ position:relative; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px; overflow:hidden; }
+  .scan-line{ position:absolute; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, var(--accent), transparent); animation:scan 3.2s ease-in-out infinite; box-shadow:0 0 20px 2px rgba(227,167,59,0.5); }
+  @keyframes scan{ 0%{ top:6%; opacity:0; } 10%{ opacity:1; } 50%{ top:88%; opacity:1;} 60%{ opacity:0; } 100%{ top:88%; opacity:0; } }
+  .scan-row{ display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+  .scan-row:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:0;}
+  .scan-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .dot-match{ background:var(--sage); }
+  .dot-gap{ background:var(--accent); }
+  .scan-text{ flex:1; }
+  .scan-label{ font-size:0.78rem; color:var(--text-muted); margin-bottom:3px; }
+  .scan-value{ font-size:0.95rem; font-weight:500; }
+  .scan-pct{ font-family:var(--font-en-head); font-weight:700; color:var(--sage); font-size:1rem; }
+
+  .section{ padding:80px 0; }
+  .section-head{ max-width:640px; margin-bottom:50px; }
+  .section-head h2{ font-size:2rem; font-weight:900; margin-bottom:16px; }
+  body.lang-en .section-head h2{ font-weight:600; }
+  .section-head p{ color:var(--text-muted); font-size:1.05rem; }
+
+  .funnel-block{ display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:44px; }
+  .funnel-stages{ display:flex; flex-direction:column; gap:0; }
+  .fstage{ display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px dashed var(--border); }
+  .fstage:last-child{ border-bottom:none; }
+  .fstage-bar{ height:34px; border-radius:6px; background:linear-gradient(90deg, var(--sage), var(--accent)); }
+  .fstage-num{ font-family:var(--font-en-head); font-weight:700; font-size:1.1rem; width:52px; flex-shrink:0; color:var(--accent);}
+  .fstage-label{ color:var(--text-muted); font-size:0.92rem; }
+  .funnel-note h3{ font-size:1.5rem; margin-bottom:14px; font-weight:800; }
+  .funnel-note p{ color:var(--text-muted); }
+
+  .features-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:24px; }
+  .feature{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:30px; }
+  .feature-icon{ width:44px; height:44px; border-radius:10px; background:var(--surface2); display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+  .feature h3{ font-size:1.2rem; margin-bottom:10px; font-weight:800; }
+  .feature p{ color:var(--text-muted); font-size:0.95rem; }
+
+  .steps{ display:flex; flex-direction:column; gap:0; }
+  .step{ display:grid; grid-template-columns:70px 1fr; gap:24px; padding:28px 0; border-bottom:1px solid var(--border); }
+  .step:last-child{ border-bottom:none; }
+  .step-num{ font-family:var(--font-en-head); font-weight:700; font-size:1.8rem; color:var(--accent-dim); }
+  .step h3{ font-size:1.15rem; margin-bottom:6px; font-weight:800; }
+  .step p{ color:var(--text-muted); font-size:0.95rem; max-width:520px; }
+
+  /* DEMO */
+  .demo-block{ display:grid; grid-template-columns:1fr 1fr; gap:30px; background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:36px; }
+  .demo-inputs{ display:flex; flex-direction:column; gap:14px; }
+  .demo-inputs label{ font-size:0.85rem; color:var(--text-muted); }
+  .demo-inputs textarea{ width:100%; min-height:110px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:10px; padding:14px; font-family:inherit; font-size:0.92rem; resize:vertical; }
+  .demo-inputs textarea:focus{ outline:none; border-color:var(--accent); }
+  .upload-row{ display:flex; align-items:center; gap:12px; }
+  .upload-btn{ display:inline-block; background:var(--surface2); color:var(--text); border:1px solid var(--border); padding:9px 18px; border-radius:8px; font-size:0.85rem; cursor:pointer; transition:border-color .15s; }
+  .upload-btn:hover{ border-color:var(--accent); }
+  .upload-status{ font-size:0.8rem; color:var(--text-muted); }
+  .demo-results{ background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:24px; display:flex; flex-direction:column; gap:18px; justify-content:center; }
+  .demo-placeholder{ color:var(--text-muted); font-size:0.92rem; text-align:center; }
+  .demo-loading{ color:var(--accent); font-size:0.92rem; text-align:center; }
+  .demo-error{ color:var(--danger); font-size:0.92rem; text-align:center; }
+  .result-score{ text-align:center; }
+  .result-score span{ font-family:var(--font-en-head); font-size:2.4rem; font-weight:700; display:block; }
+  .result-score div{ color:var(--text-muted); font-size:0.85rem; margin-top:4px; }
+  .result-col h4{ font-size:0.9rem; margin-bottom:8px; color:var(--text); }
+  .result-col ul{ list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .result-col li{ font-size:0.88rem; color:var(--text-muted); }
+
+  .cta-section{ background:var(--surface2); border-radius:20px; padding:60px 44px; text-align:center; margin:0 28px; }
+  .cta-section h2{ font-size:1.9rem; margin-bottom:14px; font-weight:900; }
+  body.lang-en .cta-section h2{ font-weight:600; }
+  .cta-section p{ color:var(--text-muted); margin-bottom:30px; max-width:480px; margin-inline:auto; }
+  .waitlist-form{ display:flex; gap:10px; max-width:420px; margin:0 auto; flex-wrap:wrap; justify-content:center; }
+  .waitlist-form input{ flex:1; min-width:200px; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:14px 18px; border-radius:10px; font-family:inherit; font-size:0.95rem; }
+  .waitlist-form input:focus{ outline:none; border-color:var(--accent); }
+  .form-note{ font-size:0.8rem; color:var(--text-muted); margin-top:14px; }
+  .waitlist-status{ font-size:0.85rem; margin-top:16px; min-height:1.2em; font-weight:600; }
+
+  footer{ padding:50px 28px 40px; text-align:center; color:var(--text-muted); font-size:0.85rem; border-top:1px solid var(--border); margin-top:80px; }
+
+  @media (max-width: 860px){
+    .hero{ grid-template-columns:1fr; padding-top:50px; }
+    .hero h1{ font-size:2.1rem; }
+    .funnel-block{ grid-template-columns:1fr; padding:28px; }
+    .features-grid{ grid-template-columns:1fr; }
+    .step{ grid-template-columns:44px 1fr; gap:16px; }
+    .cta-section{ margin:0 16px; padding:44px 24px; }
+    .demo-block{ grid-template-columns:1fr; }
+    .nav-links{ display:none; }
+  }
+</style>
+</head>
+<body class="lang-ar">
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand"><span class="brand-mark"></span><span data-lang="ar">مُطابِق</span><span data-lang="en">Mutabiq</span></div>
+    <div class="nav-links">
+      <a href="#demo" data-lang="ar">جرّب الآن</a>
+      <a href="#demo" data-lang="en">Try now</a>
+      <a href="#how" data-lang="ar">كيف يعمل</a>
+      <a href="#how" data-lang="en">How it works</a>
+      <a href="#cta" data-lang="ar">التسجيل المبكر</a>
+      <a href="#cta" data-lang="en">Early access</a>
+    </div>
+    <div class="lang-toggle">
+      <button id="btn-ar" class="active" onclick="setLang('ar')">العربية</button>
+      <button id="btn-en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <span class="eyebrow" data-lang="ar">لسوق التوظيف في السعودية والخليج</span>
+      <span class="eyebrow" data-lang="en">Built for the Saudi & Gulf job market</span>
+      <h1 data-lang="ar">سيرتك الذاتية تُرفض قبل ما يشوفها إنسان</h1>
+      <h1 data-lang="en">Your résumé gets rejected before a human ever reads it</h1>
+      <p class="lead" data-lang="ar">مُطابِق يحلّل سيرتك الذاتية مقابل إعلان الوظيفة الفعلي، ويوريك بالضبط وين الفجوة، ويطابقك تلقائياً مع الوظائف المناسبة لك — بالعربية الفصحى وباللهجات الخليجية.</p>
+      <p class="lead" data-lang="en">Mutabiq checks your résumé against the real job post, shows you exactly where the gap is, and matches you automatically with roles that fit — built natively for Arabic and Gulf dialects.</p>
+      <div class="cta-row">
+        <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})" data-lang-inline="ar">جرّب مجاناً</button>
+        <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})" data-lang-inline="en">Try it free</button>
+        <button class="btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})" data-lang-inline="ar">شاهد كيف يعمل</button>
+        <button class="btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})" data-lang-inline="en">See how it works</button>
+      </div>
+    </div>
+
+    <div class="scan-card">
+      <div class="scan-line"></div>
+      <div class="scan-row">
+        <span class="scan-dot dot-match"></span>
+        <div class="scan-text">
+          <div class="scan-label" data-lang="ar">الخبرة العملية</div>
+          <div class="scan-label" data-lang="en">Work experience</div>
+          <div class="scan-value" data-lang="ar">مطابقة قوية مع المتطلبات</div>
+          <div class="scan-value" data-lang="en">Strong match with requirements</div>
+        </div>
+        <span class="scan-pct">92%</span>
+      </div>
+      <div class="scan-row">
+        <span class="scan-dot dot-gap"></span>
+        <div class="scan-text">
+          <div class="scan-label" data-lang="ar">المهارات التقنية</div>
+          <div class="scan-label" data-lang="en">Technical skills</div>
+          <div class="scan-value" data-lang="ar">ناقصة كلمتين مفتاحيتين</div>
+          <div class="scan-value" data-lang="en">Missing two keywords</div>
+        </div>
+        <span class="scan-pct" style="color:var(--accent)">64%</span>
+      </div>
+      <div class="scan-row">
+        <span class="scan-dot dot-match"></span>
+        <div class="scan-text">
+          <div class="scan-label" data-lang="ar">المسمى الوظيفي</div>
+          <div class="scan-label" data-lang="en">Job title alignment</div>
+          <div class="scan-value" data-lang="ar">مطابق تماماً</div>
+          <div class="scan-value" data-lang="en">Exact match</div>
+        </div>
+        <span class="scan-pct">100%</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section class="section" id="problem">
+    <div class="section-head">
+      <h2 data-lang="ar">المشكلة رقمية، والحل لازم يكون رقمي</h2>
+      <h2 data-lang="en">The problem is automated — the fix has to be too</h2>
+      <p data-lang="ar">أغلب الشركات تستخدم أنظمة فرز آلي (ATS) قبل ما توصل السيرة لأي شخص. إذا سيرتك ما تتكلم "لغة" النظام، تنرفض بدون ما أحد يقرأها.</p>
+      <p data-lang="en">Most companies filter résumés with an ATS before a human sees them. If your résumé doesn't speak the system's language, it's rejected without ever being read.</p>
+    </div>
+
+    <div class="funnel-block">
+      <div class="funnel-stages">
+        <div class="fstage">
+          <span class="fstage-num">100</span>
+          <div style="flex:1">
+            <div class="fstage-bar" style="width:100%"></div>
+            <div class="fstage-label" data-lang="ar">سيرة ذاتية تقدّم على الوظيفة</div>
+            <div class="fstage-label" data-lang="en">résumés submitted for the role</div>
+          </div>
+        </div>
+        <div class="fstage">
+          <span class="fstage-num">25</span>
+          <div style="flex:1">
+            <div class="fstage-bar" style="width:25%"></div>
+            <div class="fstage-label" data-lang="ar">تتجاوز نظام الـATS الآلي</div>
+            <div class="fstage-label" data-lang="en">pass the automated ATS filter</div>
+          </div>
+        </div>
+        <div class="fstage">
+          <span class="fstage-num">6</span>
+          <div style="flex:1">
+            <div class="fstage-bar" style="width:6%"></div>
+            <div class="fstage-label" data-lang="ar">توصل فعلياً لعين مسؤول التوظيف</div>
+            <div class="fstage-label" data-lang="en">actually reach a recruiter's eyes</div>
+          </div>
+        </div>
+      </div>
+      <div class="funnel-note">
+        <h3 data-lang="ar">فجوة تُقفَل بالكلمات الصحيحة</h3>
+        <h3 data-lang="en">A gap closed by the right wording</h3>
+        <p data-lang="ar">الأنظمة الآلية تبحث عن تطابق حرفي بين إعلان الوظيفة وسيرتك. مُطابِق يقرأ الإعلان، يقارنه بسيرتك، ويقول لك بالضبط أي كلمة أو مهارة ناقصة — قبل ما ترسل.</p>
+        <p data-lang="en">Automated systems look for literal overlap between the job post and your résumé. Mutabiq reads the post, compares it line by line, and tells you exactly which word or skill is missing — before you hit send.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section class="section" id="features">
+    <div class="section-head">
+      <h2 data-lang="ar">شنو يسوي مُطابِق</h2>
+      <h2 data-lang="en">What Mutabiq does</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">📄</div>
+        <h3 data-lang="ar">تحليل السيرة الذاتية</h3>
+        <h3 data-lang="en">Résumé analysis</h3>
+        <p data-lang="ar">يفحص سيرتك بند بند، ويطلع تقرير واضح عن نقاط القوة والفجوات مقابل الوظيفة المستهدفة.</p>
+        <p data-lang="en">Checks your résumé section by section and returns a clear report of strengths and gaps against the target role.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎯</div>
+        <h3 data-lang="ar">مطابقة تلقائية مع الوظائف</h3>
+        <h3 data-lang="en">Automatic job matching</h3>
+        <p data-lang="ar">يقارن سيرتك مع إعلانات وظائف حقيقية ويرتّبها حسب نسبة التوافق، بدل ما تدوّر يدوياً.</p>
+        <p data-lang="en">Compares your résumé against real job postings and ranks them by fit, instead of you searching manually.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🗣️</div>
+        <h3 data-lang="ar">دعم كامل للعربية واللهجات الخليجية</h3>
+        <h3 data-lang="en">Full Arabic & Gulf dialect support</h3>
+        <p data-lang="ar">مبني من الصفر للغة العربية والمصطلحات المستخدمة فعلياً في إعلانات التوظيف بالسعودية والخليج.</p>
+        <p data-lang="en">Built from the ground up for Arabic and the terms actually used in Saudi and Gulf job postings.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section class="section" id="how">
+    <div class="section-head">
+      <h2 data-lang="ar">كيف يعمل</h2>
+      <h2 data-lang="en">How it works</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <div>
+          <h3 data-lang="ar">ارفع سيرتك الذاتية</h3>
+          <h3 data-lang="en">Upload your résumé</h3>
+          <p data-lang="ar">PDF أو Word، بالعربية أو الإنجليزية.</p>
+          <p data-lang="en">PDF or Word, in Arabic or English.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <div>
+          <h3 data-lang="ar">الصق رابط الوظيفة أو الوصف</h3>
+          <h3 data-lang="en">Paste the job link or description</h3>
+          <p data-lang="ar">مُطابِق يقارن سيرتك مباشرة مع متطلبات الإعلان.</p>
+          <p data-lang="en">Mutabiq compares your résumé directly against the post's requirements.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <div>
+          <h3 data-lang="ar">استلم تقرير المطابقة وتوصيات فورية</h3>
+          <h3 data-lang="en">Get your match report and instant suggestions</h3>
+          <p data-lang="ar">وشوف قائمة وظائف مشابهة مرتبة حسب نسبة توافقها معك.</p>
+          <p data-lang="en">Plus a ranked list of similar roles based on your fit.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section class="section" id="demo">
+    <div class="section-head">
+      <h2 data-lang="ar">جرّب التحليل الآن</h2>
+      <h2 data-lang="en">Try the analysis now</h2>
+      <p data-lang="ar">الصق نص سيرتك الذاتية ووصف الوظيفة، وشوف تحليل حقيقي فوري مدعوم بالذكاء الاصطناعي.</p>
+      <p data-lang="en">Paste your résumé text and the job description to see a live, AI-powered analysis.</p>
+    </div>
+    <div class="demo-block">
+      <div class="demo-inputs">
+        <label data-lang="ar">نص السيرة الذاتية</label>
+        <label data-lang="en">Résumé text</label>
+        <div class="upload-row">
+          <label class="upload-btn" for="cv-file">
+            <span data-lang-inline="ar">رفع ملف PDF</span>
+            <span data-lang-inline="en">Upload PDF</span>
+          </label>
+          <input type="file" id="cv-file" accept="application/pdf" onchange="handlePdfUpload(event)" style="display:none">
+          <span id="upload-status" class="upload-status"></span>
+        </div>
+        <textarea id="cv-input" data-lang-inline="ar" placeholder="أو الصق نص سيرتك الذاتية هنا..."></textarea>
+        <textarea id="cv-input-en" data-lang-inline="en" placeholder="Or paste your résumé text here..."></textarea>
+        <label data-lang="ar">وصف الوظيفة</label>
+        <label data-lang="en">Job description</label>
+        <textarea id="job-input" data-lang-inline="ar" placeholder="الصق وصف الوظيفة هنا..."></textarea>
+        <textarea id="job-input-en" data-lang-inline="en" placeholder="Paste the job description here..."></textarea>
+        <button id="analyze-btn" class="btn-primary" onclick="analyzeMatch()">
+          <span data-lang-inline="ar">حلّل الآن</span>
+          <span data-lang-inline="en">Analyze now</span>
+        </button>
+      </div>
+      <div class="demo-results" id="demo-results">
+        <p class="demo-placeholder" data-lang="ar">النتائج بتظهر هنا بعد التحليل.</p>
+        <p class="demo-placeholder" data-lang="en">Your results will appear here after analysis.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section class="section" id="cta">
+    <div class="cta-section">
+      <h2 data-lang="ar">كن أول من يجرّب مُطابِق</h2>
+      <h2 data-lang="en">Be first to try Mutabiq</h2>
+      <p data-lang="ar">سجّل بريدك الإلكتروني وبنعطيك دعوة مبكرة فور إطلاق النسخة التجريبية.</p>
+      <p data-lang="en">Leave your email and get an early invite the moment the beta launches.</p>
+      <form name="waitlist" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="waitlist-form" onsubmit="return handleWaitlistSubmit(event)">
+        <input type="hidden" name="form-name" value="waitlist">
+        <p style="display:none"><label>Don't fill this out: <input name="bot-field"></label></p>
+        <input type="email" id="waitlist-email" name="email" required placeholder="you@email.com">
+        <button class="btn-primary" type="submit" data-lang-inline="ar">انضم للقائمة</button>
+        <button class="btn-primary" type="submit" data-lang-inline="en">Join waitlist</button>
+      </form>
+      <div class="waitlist-status" id="waitlist-status"></div>
+      <div class="form-note" data-lang="ar">بدون رسائل مزعجة. بس نبلغك وقت الإطلاق.</div>
+      <div class="form-note" data-lang="en">No spam. Just a heads-up when we launch.</div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <span data-lang="ar">مُطابِق © 2026 — فكرة مشروع تخرج</span>
+  <span data-lang="en">Mutabiq © 2026 — a graduation project concept</span>
+</footer>
+
+<script>
+function setLang(lang){
+  document.body.classList.remove('lang-ar','lang-en');
+  document.body.classList.add('lang-' + lang);
+  document.documentElement.setAttribute('lang', lang);
+  document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  document.getElementById('btn-ar').classList.toggle('active', lang==='ar');
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  const emailInput = document.getElementById('waitlist-email');
+  if (emailInput) {
+    emailInput.placeholder = lang === 'ar' ? 'بريدك الإلكتروني' : 'you@email.com';
+  }
+}
+
+function getLang(){
+  return document.body.classList.contains('lang-en') ? 'en' : 'ar';
+}
+
+// لا حاجة لعنوان خادم — التحليل يشتغل عبر دالة سيرفرلس تابعة لنفس الموقع (Netlify Functions)،
+// وتسجيل قائمة الانتظار يشتغل عبر Netlify Forms. لا شيء تشغّله أنت بنفسك.
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+if (window['pdfjsLib']) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+async function handlePdfUpload(event){
+  const file = event.target.files[0];
+  const lang = getLang();
+  const statusEl = document.getElementById('upload-status');
+  if (!file) return;
+
+  statusEl.textContent = lang === 'ar' ? 'جاري قراءة الملف...' : 'Reading file...';
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(item => item.str).join(' ') + '\n';
+    }
+
+    const target = lang === 'en' ? document.getElementById('cv-input-en') : document.getElementById('cv-input');
+    target.value = fullText.trim();
+    statusEl.textContent = lang === 'ar' ? `تم استخراج النص من "${file.name}"` : `Extracted text from "${file.name}"`;
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = lang === 'ar' ? 'تعذّرت قراءة هذا الملف، جرّب لصق النص يدوياً.' : "Couldn't read this file — try pasting the text instead.";
+  }
+}
+
+async function analyzeMatch(){
+  const lang = getLang();
+  const cv = (lang === 'en' ? document.getElementById('cv-input-en') : document.getElementById('cv-input')).value.trim();
+  const job = (lang === 'en' ? document.getElementById('job-input-en') : document.getElementById('job-input')).value.trim();
+  const resultsEl = document.getElementById('demo-results');
+  const btn = document.getElementById('analyze-btn');
+
+  if(!cv || !job){
+    resultsEl.innerHTML = `<p class="demo-error">${lang==='ar' ? 'الرجاء تعبئة الحقلين قبل التحليل.' : 'Please fill both fields before analyzing.'}</p>`;
+    return;
+  }
+
+  resultsEl.innerHTML = `<p class="demo-loading">${lang==='ar' ? 'جاري التحليل...' : 'Analyzing...'}</p>`;
+  btn.disabled = true;
+
+  try{
+    const response = await fetch('/.netlify/functions/analyze', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cvText: cv, jobText: job })
+    });
+
+    if (!response.ok) {
+      throw new Error('server responded with ' + response.status);
+    }
+
+    const parsed = await response.json();
+
+    const score = Math.max(0, Math.min(100, parseInt(parsed.match_score, 10) || 0));
+    const scoreColor = score >= 75 ? 'var(--sage)' : (score >= 45 ? 'var(--accent)' : 'var(--danger)');
+    const matched = Array.isArray(parsed.matched_skills) ? parsed.matched_skills : [];
+    const missing = Array.isArray(parsed.missing_skills) ? parsed.missing_skills : [];
+    const suggestions = Array.isArray(parsed.suggestions) ? parsed.suggestions : [];
+
+    let html = `<div class="result-score"><span style="color:${scoreColor}">${score}%</span><div>${lang==='ar'?'نسبة التوافق':'Match score'}</div></div>`;
+    html += `<div class="result-col"><h4>${lang==='ar'?'مهارات متطابقة':'Matched skills'}</h4><ul>` + matched.map(s => `<li>✓ ${escapeHtml(s)}</li>`).join('') + `</ul></div>`;
+    html += `<div class="result-col"><h4>${lang==='ar'?'مهارات ناقصة':'Missing skills'}</h4><ul>` + missing.map(s => `<li>✕ ${escapeHtml(s)}</li>`).join('') + `</ul></div>`;
+    html += `<div class="result-col"><h4>${lang==='ar'?'توصيات':'Suggestions'}</h4><ul>` + suggestions.map(s => `<li>→ ${escapeHtml(s)}</li>`).join('') + `</ul></div>`;
+    resultsEl.innerHTML = html;
+  } catch(err){
+    resultsEl.innerHTML = `<p class="demo-error">${lang==='ar' ? 'صار خطأ أثناء التحليل، حاول مرة أخرى بعد قليل.' : 'Something went wrong, please try again shortly.'}</p>`;
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleWaitlistSubmit(e){
+  e.preventDefault();
+  const lang = getLang();
+  const form = e.target;
+  const input = document.getElementById('waitlist-email');
+  const email = input.value.trim();
+  const statusEl = document.getElementById('waitlist-status');
+
+  if(!email || !email.includes('@') || !email.includes('.')){
+    statusEl.textContent = lang==='ar' ? 'رجاءً أدخل بريد إلكتروني صحيح.' : 'Please enter a valid email address.';
+    statusEl.style.color = 'var(--danger)';
+    return false;
+  }
+
+  try{
+    const formData = new FormData(form);
+    const response = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData).toString()
+    });
+
+    if (!response.ok) {
+      throw new Error('netlify forms error: ' + response.status);
+    }
+
+    statusEl.textContent = lang==='ar' ? 'تم التسجيل! بنراسلك وقت الإطلاق.' : "You're on the list! We'll email you at launch.";
+    statusEl.style.color = 'var(--sage)';
+    input.value = '';
+  } catch(err){
+    statusEl.textContent = lang==='ar' ? 'صار خطأ، حاول مرة أخرى.' : 'Something went wrong, please try again.';
+    statusEl.style.color = 'var(--danger)';
+    console.error(err);
+  }
+  return false;
+}
+</script>
+
+</body>
+</html>
